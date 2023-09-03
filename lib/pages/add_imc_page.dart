@@ -73,6 +73,7 @@ class _AddImcPageState extends State<AddImcPage> {
                 widget: StringInput(
                   hint:
                       DateFormat.yMd(Constants.appLocale).format(_selectedDate),
+                  readOnly: true,
                 ),
                 sufixWidget: IconButton(
                   icon: const Icon(
@@ -80,7 +81,7 @@ class _AddImcPageState extends State<AddImcPage> {
                     color: Colors.grey,
                   ),
                   onPressed: () {
-                    _getDateFromUser();
+                    _getSelectedDate();
                   },
                 ),
               ),
@@ -162,7 +163,7 @@ class _AddImcPageState extends State<AddImcPage> {
     );
   }
 
-  _getDateFromUser() async {
+  _getSelectedDate() async {
     debugPrint(Intl.defaultLocale);
     DateTime? pickerDate = await showDatePicker(
       locale: const Locale('pt', 'BR'),

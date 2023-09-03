@@ -33,6 +33,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final startDate = DateTime(2023, 01, 01);
   DateTime _selectedDate = DateTime.now();
+  DateTime _selectedEditingDate = DateTime.now();
   final datePickerController = DatePickerController();
 
   final TextEditingController _weightController =
@@ -56,12 +57,16 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _refreshImcList() async {
+    debugPrint("Aqui!!!!! $_selectedDate");
     ImcResponse response = await _imcController
         .getImcs(DateFormat.yMd(Constants.appLocale).format(_selectedDate));
 
     if (response.error) {
       await Get.dialog(FeedBackDialog(response: response));
     }
+
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => datePickerController.animateToDate(_selectedDate));
   }
 
   @override
@@ -286,7 +291,8 @@ class _HomePageState extends State<HomePage> {
             InputFormField(
               title: "Data",
               widget: StringInput(
-                hint: DateFormat.yMd(Constants.appLocale).format(_selectedDate),
+                hint: DateFormat.yMd(Constants.appLocale)
+                    .format(_selectedEditingDate),
                 readOnly: true,
               ),
               sufixWidget: IconButton(
@@ -294,8 +300,8 @@ class _HomePageState extends State<HomePage> {
                   Icons.calendar_today_outlined,
                   color: Colors.grey,
                 ),
-                onPressed: () {
-                  _getSelectedDate();
+                onPressed: () async {
+                  await _getSelectedDate();
                 },
               ),
             ),
@@ -308,7 +314,6 @@ class _HomePageState extends State<HomePage> {
                 var isValidated = _validateEditForm(imc);
                 if (isValidated) Get.back();
               });
-              //Get.back();
             },
             style: TextButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.labelLarge),
@@ -343,6 +348,8 @@ class _HomePageState extends State<HomePage> {
     }
 
     _updateImc(imc);
+    _refreshImcList();
+
     Get.back();
     return true;
   }
@@ -350,7 +357,8 @@ class _HomePageState extends State<HomePage> {
   _updateImc(Imc imc) async {
     imc.height = NumberFormat().parse(_heightController.text).toDouble();
     imc.weight = NumberFormat().parse(_weightController.text).toDouble();
-    imc.measuredAt = DateFormat.yMd(Constants.appLocale).format(_selectedDate);
+    imc.measuredAt =
+        DateFormat.yMd(Constants.appLocale).format(_selectedEditingDate);
     imc.updatedAt = DateFormat.yMd(Constants.appLocale).format(DateTime.now());
 
     debugPrint(imc.toJson().toString());
@@ -364,14 +372,14 @@ class _HomePageState extends State<HomePage> {
     DateTime? pickerDate = await showDatePicker(
       locale: const Locale('pt', 'BR'),
       context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2023),
+      initialDate: _selectedEditingDate,
+      firstDate: startDate,
       lastDate: DateTime.now(),
     );
 
     if (pickerDate != null) {
       setState(() {
-        _selectedDate = pickerDate;
+        _selectedEditingDate = pickerDate;
       });
     } else {
       debugPrint("Erro... Data inválida.");
