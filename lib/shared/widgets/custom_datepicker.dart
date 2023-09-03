@@ -60,7 +60,6 @@ class CustomDatePicker extends StatelessWidget {
   int _calculateDays(var startDate) {
     final today = DateTime.now();
     final difference = today.difference(startDate).inDays;
-    debugPrint(difference.toString());
     return difference;
   }
 }

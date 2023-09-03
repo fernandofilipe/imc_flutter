@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
   final startDate = DateTime(2023, 01, 01);
   DateTime _selectedDate = DateTime.now();
   DateTime _selectedEditingDate = DateTime.now();
-  final datePickerController = DatePickerController();
+  final _datePickerController = DatePickerController();
 
   final TextEditingController _weightController =
       TextEditingController(text: "");
@@ -46,11 +46,13 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback(
-        (_) => datePickerController.animateToDate(_selectedDate));
+        (_) => _datePickerController.animateToDate(_selectedDate));
+    _refreshImcList();
   }
 
   @override
   void dispose() {
+    _imcController.dispose();
     _heightController.dispose();
     _weightController.dispose();
     super.dispose();
@@ -66,7 +68,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     WidgetsBinding.instance.addPostFrameCallback(
-        (_) => datePickerController.animateToDate(_selectedDate));
+        (_) => _datePickerController.animateToDate(_selectedDate));
   }
 
   _updateImc(Imc imc) async {
@@ -87,6 +89,26 @@ class _HomePageState extends State<HomePage> {
     _refreshImcList();
     await Get.dialog(FeedBackDialog(response: response));
     if (!response.error) Get.back();
+  }
+
+  bool _validateEditForm(Imc imc) {
+    var height = _heightController.text;
+    var weight = _weightController.text;
+    ImcResponse validation = ImcValidator()
+        .validate(height: height, weight: weight, isEditing: true);
+
+    if (validation.error) {
+      AlertValidation.showCustomSnackbar(
+        title: validation.title,
+        message: validation.message,
+      );
+
+      return false;
+    }
+
+    _updateImc(imc);
+    Get.back();
+    return true;
   }
 
   @override
@@ -165,7 +187,7 @@ class _HomePageState extends State<HomePage> {
       child: CustomDatePicker(
         startDate: startDate,
         selectedDate: _selectedDate,
-        controller: datePickerController,
+        controller: _datePickerController,
         onDateChanged: (date) {
           _selectedDate = date;
           _refreshImcList();
@@ -175,7 +197,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   _showImcList() {
-    _refreshImcList();
     return Expanded(
       child: Obx(
         () {
@@ -212,7 +233,10 @@ class _HomePageState extends State<HomePage> {
   _showAddImcButton() {
     return FloatingActionButton(
       onPressed: () async {
-        await Get.to(() => const AddImcPage());
+        await Get.to(
+          () => const AddImcPage(),
+          preventDuplicates: true,
+        );
         _refreshImcList();
       },
       shape: const CircleBorder(),
@@ -349,30 +373,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  bool _validateEditForm(Imc imc) {
-    var height = _heightController.text;
-    var weight = _weightController.text;
-    ImcResponse validation = ImcValidator()
-        .validate(height: height, weight: weight, isEditing: true);
-
-    if (validation.error) {
-      AlertValidation.showCustomSnackbar(
-        title: validation.title,
-        message: validation.message,
-      );
-
-      return false;
-    }
-
-    _updateImc(imc);
-    _refreshImcList();
-
-    Get.back();
-    return true;
-  }
-
   _getSelectedDate() async {
-    debugPrint(Intl.defaultLocale);
     DateTime? pickerDate = await showDatePicker(
       locale: const Locale('pt', 'BR'),
       context: context,

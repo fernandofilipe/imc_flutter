@@ -33,6 +33,14 @@ class _AddImcPageState extends State<AddImcPage> {
   DateTime _selectedDate = DateTime.now();
 
   @override
+  void dispose() {
+    _nameController.dispose();
+    _heightController.dispose();
+    _weightController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.theme.colorScheme.background,
@@ -164,7 +172,6 @@ class _AddImcPageState extends State<AddImcPage> {
   }
 
   _getSelectedDate() async {
-    debugPrint(Intl.defaultLocale);
     DateTime? pickerDate = await showDatePicker(
       locale: const Locale('pt', 'BR'),
       context: context,
