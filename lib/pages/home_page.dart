@@ -57,7 +57,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _refreshImcList() async {
-    debugPrint("Aqui!!!!! $_selectedDate");
+    debugPrint("------------------ ATUALIZOU!!! ---------------------");
     ImcResponse response = await _imcController
         .getImcs(DateFormat.yMd(Constants.appLocale).format(_selectedDate));
 
@@ -67,6 +67,26 @@ class _HomePageState extends State<HomePage> {
 
     WidgetsBinding.instance.addPostFrameCallback(
         (_) => datePickerController.animateToDate(_selectedDate));
+  }
+
+  _updateImc(Imc imc) async {
+    imc.height = NumberFormat().parse(_heightController.text).toDouble();
+    imc.weight = NumberFormat().parse(_weightController.text).toDouble();
+    imc.measuredAt =
+        DateFormat.yMd(Constants.appLocale).format(_selectedEditingDate);
+    imc.updatedAt = DateFormat.yMd(Constants.appLocale).format(DateTime.now());
+
+    ImcResponse response = await _imcController.updateImc(imc);
+    _refreshImcList();
+    await Get.dialog(FeedBackDialog(response: response));
+    if (!response.error) Get.back();
+  }
+
+  _deleteImc(Imc imc) async {
+    ImcResponse response = await _imcController.delete(imc);
+    _refreshImcList();
+    await Get.dialog(FeedBackDialog(response: response));
+    if (!response.error) Get.back();
   }
 
   @override
@@ -235,10 +255,7 @@ class _HomePageState extends State<HomePage> {
               color: Colors.red[300]!,
               context: context,
               onTap: () {
-                setState(() {
-                  _imcController.delete(imc);
-                });
-                Get.back();
+                _deleteImc(imc);
               },
             ),
             const SizedBox(height: 20),
@@ -352,19 +369,6 @@ class _HomePageState extends State<HomePage> {
 
     Get.back();
     return true;
-  }
-
-  _updateImc(Imc imc) async {
-    imc.height = NumberFormat().parse(_heightController.text).toDouble();
-    imc.weight = NumberFormat().parse(_weightController.text).toDouble();
-    imc.measuredAt =
-        DateFormat.yMd(Constants.appLocale).format(_selectedEditingDate);
-    imc.updatedAt = DateFormat.yMd(Constants.appLocale).format(DateTime.now());
-
-    debugPrint(imc.toJson().toString());
-
-    var countUpdatedImcs = await _imcController.updateImc(imc);
-    debugPrint("$countUpdatedImcs item(s) atualizado(s)");
   }
 
   _getSelectedDate() async {

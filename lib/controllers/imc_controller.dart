@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:imc_flutter/database/db_helper.dart';
 import 'package:imc_flutter/models/imc.dart';
@@ -19,14 +18,11 @@ class ImcController extends GetxController {
     return response;
   }
 
-  void delete(Imc imc) {
-    var response = DBHelper.delete(imc);
-    debugPrint(response.toString());
+  Future<ImcResponse> delete(Imc imc) async {
+    return await DBHelper.delete(imc);
   }
 
-  Future<int> updateImc(Imc imc) async {
-    var response = await DBHelper.update(imc);
-    debugPrint(response.toString());
-    return response;
+  Future<ImcResponse> updateImc(Imc imc) async {
+    return await DBHelper.update(imc);
   }
 }

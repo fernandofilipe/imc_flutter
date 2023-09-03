@@ -61,7 +61,7 @@ class ImcValidator {
           error: true,
           title: "Obrigatório",
           message:
-              "O campo ALTURA digitada deve estar entre 25 e 300 quilogramas.");
+              "O campo PESO digitada deve estar entre 25 e 300 quilogramas.");
     }
 
     return ImcResponse(

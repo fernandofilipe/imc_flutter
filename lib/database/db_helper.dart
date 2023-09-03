@@ -35,6 +35,7 @@ class DBHelper {
       if (_database == null) throw DatabaseConnectionException();
 
       int id = await _database!.insert(_tablename, imc.toJson());
+
       return ImcResponse(
         error: false,
         data: id,
@@ -66,10 +67,11 @@ class DBHelper {
 
       var data = await _database!.query(_tablename,
           where: "measured_at=?", whereArgs: [date], orderBy: "id DESC");
+
       return ImcResponse(
         error: false,
         data: data,
-        message: "Inserido com sucesso.",
+        message: "O Item CADASTRADO com sucesso.",
         title: "Sucesso",
       );
     } on DatabaseConnectionException catch (e) {
@@ -91,22 +93,70 @@ class DBHelper {
     }
   }
 
-  static Future<int> delete(Imc imc) async {
-    return await _database!
-        .delete(_tablename, where: "id=?", whereArgs: [imc.id]);
+  static Future<ImcResponse> delete(Imc imc) async {
+    try {
+      if (_database == null) throw DatabaseConnectionException();
+
+      int id = await _database!
+          .delete(_tablename, where: "id=?", whereArgs: [imc.id]);
+
+      return ImcResponse(
+        error: false,
+        data: id,
+        message: "O Item #${imc.id} foi REMOVIDO com sucesso.",
+        title: "Sucesso",
+      );
+    } on DatabaseConnectionException catch (e) {
+      debugPrint("Database error: $e");
+      return ImcResponse(
+        error: true,
+        data: null,
+        message: e.toString(),
+        title: "Erro",
+      );
+    } catch (e) {
+      debugPrint("Database error: $e");
+      return ImcResponse(
+        error: true,
+        data: null,
+        message: e.toString(),
+        title: "Erro",
+      );
+    }
   }
 
-  static Future<int> update(Imc imc) async {
+  static Future<ImcResponse> update(Imc imc) async {
     try {
-      return await _database!.update(
+      if (_database == null) throw DatabaseConnectionException();
+
+      int id = await _database!.update(
         _tablename,
         imc.toJson(),
         where: "id=?",
         whereArgs: [imc.id],
       );
+      return ImcResponse(
+        error: false,
+        data: id,
+        message: "O Item #${imc.id} foi ATUALIZADO com sucesso.",
+        title: "Sucesso",
+      );
+    } on DatabaseConnectionException catch (e) {
+      debugPrint("Database error: $e");
+      return ImcResponse(
+        error: true,
+        data: null,
+        message: e.toString(),
+        title: "Erro",
+      );
     } catch (e) {
-      debugPrint(e.toString());
-      return 0;
+      debugPrint("Database error: $e");
+      return ImcResponse(
+        error: true,
+        data: null,
+        message: e.toString(),
+        title: "Erro",
+      );
     }
   }
 }
