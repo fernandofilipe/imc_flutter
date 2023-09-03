@@ -36,6 +36,9 @@ class _HomePageState extends State<HomePage> {
   DateTime _selectedEditingDate = DateTime.now();
   final _datePickerController = DatePickerController();
 
+  final TextEditingController _calendarInputFieldController =
+      TextEditingController(text: "");
+
   final TextEditingController _weightController =
       TextEditingController(text: "");
   final TextEditingController _heightController =
@@ -55,6 +58,7 @@ class _HomePageState extends State<HomePage> {
     _imcController.dispose();
     _heightController.dispose();
     _weightController.dispose();
+    _calendarInputFieldController.dispose();
     super.dispose();
   }
 
@@ -270,6 +274,7 @@ class _HomePageState extends State<HomePage> {
                 setState(() {
                   _heightController.text = imc.height.toString();
                   _weightController.text = imc.weight.toString();
+                  _calendarInputFieldController.text = imc.measuredAt;
                 });
                 _showEditDialog(context, imc);
               },
@@ -335,14 +340,15 @@ class _HomePageState extends State<HomePage> {
                 hint: DateFormat.yMd(Constants.appLocale)
                     .format(_selectedEditingDate),
                 readOnly: true,
+                controller: _calendarInputFieldController,
               ),
               sufixWidget: IconButton(
                 icon: const Icon(
                   Icons.calendar_today_outlined,
                   color: Colors.grey,
                 ),
-                onPressed: () async {
-                  await _getSelectedDate();
+                onPressed: () {
+                  _getSelectedDate();
                 },
               ),
             ),
@@ -385,6 +391,8 @@ class _HomePageState extends State<HomePage> {
     if (pickerDate != null) {
       setState(() {
         _selectedEditingDate = pickerDate;
+        _calendarInputFieldController.text =
+            DateFormat.yMd(Constants.appLocale).format(_selectedEditingDate);
       });
     } else {
       debugPrint("Erro... Data inválida.");

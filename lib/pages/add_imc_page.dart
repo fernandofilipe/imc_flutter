@@ -30,6 +30,9 @@ class _AddImcPageState extends State<AddImcPage> {
   final TextEditingController _heightController =
       TextEditingController(text: "");
 
+  final TextEditingController _calendarInputFieldController =
+      TextEditingController(text: "");
+
   DateTime _selectedDate = DateTime.now();
 
   @override
@@ -37,6 +40,7 @@ class _AddImcPageState extends State<AddImcPage> {
     _nameController.dispose();
     _heightController.dispose();
     _weightController.dispose();
+    _calendarInputFieldController.dispose();
     super.dispose();
   }
 
@@ -82,6 +86,7 @@ class _AddImcPageState extends State<AddImcPage> {
                   hint:
                       DateFormat.yMd(Constants.appLocale).format(_selectedDate),
                   readOnly: true,
+                  controller: _calendarInputFieldController,
                 ),
                 sufixWidget: IconButton(
                   icon: const Icon(
@@ -183,6 +188,8 @@ class _AddImcPageState extends State<AddImcPage> {
     if (pickerDate != null) {
       setState(() {
         _selectedDate = pickerDate;
+        _calendarInputFieldController.text =
+            DateFormat.yMd(Constants.appLocale).format(_selectedDate);
       });
     } else {
       debugPrint("Erro... Data inválida.");
