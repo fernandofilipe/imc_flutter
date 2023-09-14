@@ -1,6 +1,4 @@
-# Fernando Reis
-
-🎉🎉 Desafio IMC Flutter - **Bootcamp Santander 2023**.
+# 🎉🎉 Desafio IMC Flutter - **Bootcamp Santander 2023**.
 
 <img src="https://imgur.com/Su998MI.png" alt="octocat" width="200" height="200">
 
