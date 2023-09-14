@@ -44,6 +44,8 @@ dependencies:
   date_picker_timeline:
   sqflite:
   flutter_staggered_animations: ^1.1.1
+  flutter_typeahead:
+  curved_navigation_bar: 1.0.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

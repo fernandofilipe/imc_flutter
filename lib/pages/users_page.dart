@@ -1,104 +1,80 @@
-import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:imc_flutter/controllers/imc_controller.dart';
-import 'package:imc_flutter/models/imc.dart';
-import 'package:imc_flutter/models/imc_validator.dart';
+import 'package:imc_flutter/controllers/user_controller.dart';
 import 'package:imc_flutter/models/response.dart';
-import 'package:imc_flutter/pages/add_imc_page.dart';
+import 'package:imc_flutter/models/user.dart';
+import 'package:imc_flutter/models/user_validator.dart';
+import 'package:imc_flutter/pages/add_user_page.dart';
 import 'package:imc_flutter/pages/profile_page.dart';
 import 'package:imc_flutter/services/theme_services.dart';
 import 'package:imc_flutter/shared/colors.dart';
 import 'package:imc_flutter/shared/constants.dart';
 import 'package:imc_flutter/shared/layout/theme.dart';
+import 'package:imc_flutter/shared/utils/number_utils.dart';
 import 'package:imc_flutter/shared/widgets/alert_validation.dart';
 import 'package:imc_flutter/shared/widgets/custom_bottom_sheet_button.dart';
-import 'package:imc_flutter/shared/widgets/custom_datepicker.dart';
 import 'package:imc_flutter/shared/widgets/feedback_dialog.dart';
-import 'package:imc_flutter/shared/widgets/imc_tile.dart';
 import 'package:imc_flutter/shared/widgets/input_form_field.dart';
 import 'package:imc_flutter/shared/widgets/number_input.dart';
 import 'package:imc_flutter/shared/widgets/string_input.dart';
-import 'dart:math' as math;
+import 'package:imc_flutter/shared/widgets/user_tile.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:imc_flutter/shared/utils/number_utils.dart';
+import 'dart:math' as math;
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class UsersPage extends StatefulWidget {
+  const UsersPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<UsersPage> createState() => _UsersPageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  final startDate = DateTime(2023, 01, 01);
-  DateTime _selectedDate = DateTime.now();
-  DateTime _selectedEditingDate = DateTime.now();
-  final _datePickerController = DatePickerController();
-
-  final TextEditingController _calendarInputFieldController =
-      TextEditingController(text: "");
-
-  final TextEditingController _weightController =
-      TextEditingController(text: "");
+class _UsersPageState extends State<UsersPage> {
+  final UserController _userController = Get.put(UserController());
+  final TextEditingController _nameController = TextEditingController(text: "");
   final TextEditingController _heightController =
       TextEditingController(text: "");
-  final ImcController _imcController = Get.put(ImcController());
+
   final box = GetStorage();
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-        (_) => _datePickerController.animateToDate(_selectedDate));
-    _refreshImcList();
+    _refreshUsersList();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  Future<void> _refreshImcList() async {
+  Future<void> _refreshUsersList() async {
     debugPrint("------------------ ATUALIZOU!!! ---------------------");
-    ImcResponse response = await _imcController
-        .getImcs(DateFormat.yMd(Constants.appLocale).format(_selectedDate));
-
+    UserResponse response = await _userController.getUsers();
     if (response.error) {
       await Get.dialog(FeedBackDialog(response: response));
     }
-
-    WidgetsBinding.instance.addPostFrameCallback(
-        (_) => _datePickerController.animateToDate(_selectedDate));
   }
 
-  _updateImc(Imc imc) async {
-    imc.height = NumberFormat().parse(_heightController.text).toDouble();
-    imc.weight = NumberFormat().parse(_weightController.text).toDouble();
-    imc.measuredAt =
-        DateFormat.yMd(Constants.appLocale).format(_selectedEditingDate);
-    imc.updatedAt = DateFormat.yMd(Constants.appLocale).format(DateTime.now());
+  _updateUser(User user) async {
+    user.name = _nameController.text;
+    user.height = NumberFormat().parse(_heightController.text).toDouble();
+    user.updatedAt = DateTime.now().toString();
 
-    ImcResponse response = await _imcController.updateImc(imc);
-    _refreshImcList();
+    UserResponse response = await _userController.updateUser(user);
+    _refreshUsersList();
     await Get.dialog(FeedBackDialog(response: response));
     if (!response.error) Get.back();
   }
 
-  _deleteImc(Imc imc) async {
-    ImcResponse response = await _imcController.delete(imc);
-    _refreshImcList();
+  _deleteUser(User user) async {
+    UserResponse response = await _userController.delete(user);
+    _refreshUsersList();
     await Get.dialog(FeedBackDialog(response: response));
     if (!response.error) Get.back();
   }
 
-  bool _validateEditForm(Imc imc) {
+  bool _validateEditForm(User user) {
     var height = _heightController.text;
-    var weight = _weightController.text;
-    ImcResponse validation = ImcValidator()
-        .validate(height: height, weight: weight, isEditing: true);
+    var name = _nameController.text;
+    UserResponse validation =
+        UserValidator().validate(height: height, name: name, isEditing: true);
 
     if (validation.error) {
       AlertValidation.showCustomSnackbar(
@@ -109,7 +85,7 @@ class _HomePageState extends State<HomePage> {
       return false;
     }
 
-    _updateImc(imc);
+    _updateUser(user);
     Get.back();
     return true;
   }
@@ -117,20 +93,28 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _showAppBar(context, box.read('initials')),
+      appBar: _showAppBar(box.read('initials')),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _showAppHeader(),
-          _showCalendarFilter(),
           const SizedBox(height: 10),
-          _showImcList(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Text(
+              "Usuários",
+              style: headingStyle,
+            ),
+          ),
+          const SizedBox(height: 10),
+          _showUsersList(),
         ],
       ),
-      floatingActionButton: _showAddImcButton(),
+      floatingActionButton: _showAddUserButton(),
     );
   }
 
-  _showAppBar(BuildContext context, String initial) {
+  _showAppBar(String initial) {
     return AppBar(
       elevation: 0,
       backgroundColor: context.theme.colorScheme.background,
@@ -143,7 +127,7 @@ class _HomePageState extends State<HomePage> {
           child: Get.isDarkMode
               ? const Icon(Icons.wb_sunny_outlined, size: 20)
               : const Icon(
-                  Icons.nightlight_outlined,
+                  Icons.nightlight_outlined, //wb_sunny_outlined
                   size: 20,
                   color: AppColors.darkGreyClr,
                 ),
@@ -190,27 +174,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  _showCalendarFilter() {
-    return Container(
-      margin: const EdgeInsets.only(top: 12, left: 19),
-      child: CustomDatePicker(
-        startDate: startDate,
-        selectedDate: _selectedDate,
-        controller: _datePickerController,
-        onDateChanged: (date) {
-          _selectedDate = date;
-          _refreshImcList();
-        },
-      ),
-    );
-  }
-
-  _showImcList() {
+  _showUsersList() {
     return Expanded(
       child: Obx(
         () {
           return ListView.builder(
-            itemCount: _imcController.imcList.length,
+            itemCount: _userController.userList.length,
             itemBuilder: (_, index) {
               return AnimationConfiguration.staggeredList(
                 position: index,
@@ -220,12 +189,11 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            _showBottomSheet(
-                                context, _imcController.imcList[index]);
+                            _showBottomSheet(_userController.userList[index]);
                           },
-                          child: ImcTile(
-                            imc: _imcController.imcList[index],
-                          ),
+                          child: UserTile(
+                            user: _userController.userList[index],
+                          ), //Tile Goes Here!!
                         ),
                       ],
                     ),
@@ -239,21 +207,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  _showAddImcButton() {
-    return FloatingActionButton(
-      onPressed: () async {
-        await Get.to(
-          () => const AddImcPage(),
-          preventDuplicates: true,
-        );
-        _refreshImcList();
-      },
-      shape: const CircleBorder(),
-      child: const Icon(Icons.add),
-    );
-  }
-
-  _showBottomSheet(BuildContext context, Imc imc) {
+  _showBottomSheet(User user) {
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.only(top: 4),
@@ -272,24 +226,23 @@ class _HomePageState extends State<HomePage> {
             ),
             const Spacer(),
             CustomBottomSheetButton(
-              label: "Atualizar Medida",
+              label: "Atualizar Dados",
               color: AppColors.primaryClr,
               context: context,
               onTap: () {
                 setState(() {
-                  _heightController.text = imc.height.toString();
-                  _weightController.text = imc.weight.toString();
-                  _calendarInputFieldController.text = imc.measuredAt;
+                  _heightController.text = user.height.toString();
+                  _nameController.text = user.name;
                 });
-                _showEditDialog(context, imc);
+                _showEditDialog(user);
               },
             ),
             CustomBottomSheetButton(
-              label: "Remover Medida",
+              label: "Remover Usuário",
               color: Colors.red[300]!,
               context: context,
               onTap: () {
-                _deleteImc(imc);
+                _deleteUser(user);
               },
             ),
             const SizedBox(height: 20),
@@ -309,21 +262,23 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  _showEditDialog(BuildContext context, Imc imc) {
+  _showEditDialog(User user) {
     NumberUtils.formatToNumberTextEditingText(_heightController);
-    NumberUtils.formatToNumberTextEditingText(_weightController);
 
     return Get.dialog(
       AlertDialog(
         title: Text(
-          "Alterar Medidas",
+          "Alterar Dados",
           style: headingStyle,
         ),
         content: Wrap(
           children: [
-            Text(
-              imc.user,
-              style: subHeadingStyle,
+            InputFormField(
+              title: "Nome",
+              widget: StringInput(
+                hint: "Escreva seu nome.",
+                controller: _nameController,
+              ),
             ),
             InputFormField(
               title: "Altura",
@@ -332,38 +287,13 @@ class _HomePageState extends State<HomePage> {
                 controller: _heightController,
               ),
             ),
-            InputFormField(
-              title: "Peso",
-              widget: NumberInput(
-                hint: "Digite seu peso em Kg.",
-                controller: _weightController,
-              ),
-            ),
-            InputFormField(
-              title: "Data",
-              widget: StringInput(
-                hint: DateFormat.yMd(Constants.appLocale)
-                    .format(_selectedEditingDate),
-                readOnly: true,
-                controller: _calendarInputFieldController,
-              ),
-              sufixWidget: IconButton(
-                icon: const Icon(
-                  Icons.calendar_today_outlined,
-                  color: Colors.grey,
-                ),
-                onPressed: () {
-                  _getSelectedDate();
-                },
-              ),
-            ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () {
               setState(() {
-                var isValidated = _validateEditForm(imc);
+                var isValidated = _validateEditForm(user);
                 if (isValidated) Get.back();
               });
             },
@@ -384,23 +314,17 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  _getSelectedDate() async {
-    DateTime? pickerDate = await showDatePicker(
-      locale: const Locale('pt', 'BR'),
-      context: context,
-      initialDate: _selectedEditingDate,
-      firstDate: startDate,
-      lastDate: DateTime.now(),
+  _showAddUserButton() {
+    return FloatingActionButton(
+      onPressed: () async {
+        await Get.to(
+          () => const AddUserPage(),
+          preventDuplicates: true,
+        );
+        _refreshUsersList();
+      },
+      shape: const CircleBorder(),
+      child: const Icon(Icons.add),
     );
-
-    if (pickerDate != null) {
-      setState(() {
-        _selectedEditingDate = pickerDate;
-        _calendarInputFieldController.text =
-            DateFormat.yMd(Constants.appLocale).format(_selectedEditingDate);
-      });
-    } else {
-      debugPrint("Erro... Data inválida.");
-    }
   }
 }

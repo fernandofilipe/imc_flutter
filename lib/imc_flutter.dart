@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:imc_flutter/pages/home_page.dart';
+import 'package:imc_flutter/pages/main_page.dart';
 import 'package:imc_flutter/services/theme_services.dart';
 import 'package:imc_flutter/shared/constants.dart';
 import 'package:imc_flutter/shared/layout/theme.dart';
@@ -17,7 +17,7 @@ class IMCFlutter extends StatelessWidget {
       themeMode: ThemeService().theme,
       theme: AppThemes.light,
       darkTheme: AppThemes.dark,
-      home: const HomePage(),
+      home: const MainPage(),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate

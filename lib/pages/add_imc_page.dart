@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:imc_flutter/controllers/imc_controller.dart';
 import 'package:imc_flutter/models/imc.dart';
 import 'package:imc_flutter/models/imc_validator.dart';
@@ -32,6 +33,7 @@ class _AddImcPageState extends State<AddImcPage> {
 
   final TextEditingController _calendarInputFieldController =
       TextEditingController(text: "");
+  final box = GetStorage();
 
   DateTime _selectedDate = DateTime.now();
 
@@ -165,11 +167,11 @@ class _AddImcPageState extends State<AddImcPage> {
           size: 20,
         ),
       ),
-      actions: const [
+      actions: [
         CircleAvatar(
-          child: Text("FR"),
+          child: Text(box.read('initials')),
         ),
-        SizedBox(
+        const SizedBox(
           width: 20,
         )
       ],

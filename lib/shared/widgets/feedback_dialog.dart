@@ -4,7 +4,7 @@ import 'package:imc_flutter/models/response.dart';
 import 'package:imc_flutter/shared/layout/theme.dart';
 
 class FeedBackDialog extends StatelessWidget {
-  final ImcResponse response;
+  final GeneralResponse response;
   const FeedBackDialog({super.key, required this.response});
   final textMaxLines = 10;
 

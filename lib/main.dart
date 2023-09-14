@@ -12,6 +12,13 @@ Future<void> main() async {
   await DBHelper.init();
   await GetStorage.init();
 
+  final box = GetStorage();
+
+  //Simulando que esses dados vieram de login
+  box.write('username', 'Fernando Reis');
+  box.write('initials', 'FR');
+  box.write('height', '1,83');
+
   Intl.defaultLocale = Constants.appLocale;
   initializeDateFormatting(Constants.appLocale);
   runApp(const IMCFlutter());
