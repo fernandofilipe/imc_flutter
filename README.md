@@ -33,7 +33,8 @@ Durante os estudos para construir o APP coloquei algumas funcionalidades extras,
 * Bottom Navigator estilizado: Foi utilizada a biblioteca `curved_navigation_bar` respeitando as cores do tema definido no sistema;
 * Modo de **edição/deleção** de registros: Ao clicar em uma leitura você poderá escolher entre as funcionalidades de edição e deleção
 do registro em questão;
-* Persistência de dados no `SQLite`: Os registros de imc e usuários cadastrados são persistidos no `SQLite`.
+* Persistência de dados no `SQLite`: Os registros de imc e usuários cadastrados são persistidos no `SQLite`. 
+    * ⚠️ Na V2 esse item se tornou obrigatório.
 
 ## 📚 Bibliografia
 
