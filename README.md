@@ -36,6 +36,18 @@ do registro em questão;
 * Persistência de dados no `SQLite`: Os registros de imc e usuários cadastrados são persistidos no `SQLite`. 
     * ⚠️ Na V2 esse item se tornou obrigatório.
 
+## Imagens do APP
+
+![Tela Principal Modo Claro](image.png)
+![Tela Principal Modo Escuro](image-1.png)
+![Cadastro de Usuários](image-2.png)
+![Perfil](image-3.png)
+![Edição Imagem 1](image-4.png)
+![Edição Imagem 2](image-5.png)
+![Adicionar Medidas Imagem 1](image-6.png)
+![Adicionar Medidas Imagem 2](image-7.png)
+
+
 ## 📚 Bibliografia
 
 * [Curved Navigator](https://pub.dev/packages/curved_navigation_bar)
