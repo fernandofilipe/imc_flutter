@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:imc_flutter/shared/layout/theme.dart';
+import 'package:get/get.dart';
 
 class InputFormField extends StatelessWidget {
   final String title;
@@ -21,7 +21,15 @@ class InputFormField extends StatelessWidget {
         children: [
           Text(
             title,
-            style: titleStyle,
+            style: Get.isDarkMode
+                ? Theme.of(context)
+                    .textTheme
+                    .bodyMedium!
+                    .copyWith(color: Theme.of(context).colorScheme.onSurface)
+                : Theme.of(context)
+                    .textTheme
+                    .bodyMedium!
+                    .copyWith(color: Theme.of(context).colorScheme.primary),
           ),
           Row(
             children: [

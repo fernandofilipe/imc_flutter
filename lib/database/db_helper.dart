@@ -44,11 +44,56 @@ class DBHelper {
       if (_database == null) throw DatabaseConnectionException();
 
       int id = await _database!.insert(_tablename, imc.toJson());
+      ImcResponse response = await getImcById(id);
+      List<Imc> newImc = response.data;
 
       return ImcResponse(
         error: false,
-        data: id,
+        data: newImc,
         message: "Inserido com sucesso.",
+        title: "Sucesso",
+      );
+    } on DatabaseConnectionException catch (e) {
+      debugPrint("Database error: $e");
+      return ImcResponse(
+        error: true,
+        data: null,
+        message: e.toString(),
+        title: "Erro",
+      );
+    } catch (e) {
+      debugPrint("Database error: $e");
+      return ImcResponse(
+        error: true,
+        data: null,
+        message: e.toString(),
+        title: "Erro",
+      );
+    }
+  }
+
+  static Future<ImcResponse> getImcById(int id) async {
+    try {
+      if (_database == null) throw DatabaseConnectionException();
+
+      var data = await _database!.query(_tablename,
+          where: "id=?", whereArgs: [id], orderBy: "id DESC");
+
+      return ImcResponse(
+        error: false,
+        data: data
+            .map((imc) => Imc(
+                  imc['height'] as double,
+                  imc['weight'] as double,
+                  imc['user'] as String,
+                  imc['measured_at'] as String,
+                  imc['created_at'] as String,
+                  imc['updated_at'] as String,
+                  imc['active'] as int,
+                  imc['id'] as int,
+                ))
+            .toList(),
+        message: "O Item CADASTRADO com sucesso.",
         title: "Sucesso",
       );
     } on DatabaseConnectionException catch (e) {
@@ -106,12 +151,11 @@ class DBHelper {
     try {
       if (_database == null) throw DatabaseConnectionException();
 
-      int id = await _database!
-          .delete(_tablename, where: "id=?", whereArgs: [imc.id]);
+      await _database!.delete(_tablename, where: "id=?", whereArgs: [imc.id]);
 
       return ImcResponse(
         error: false,
-        data: id,
+        data: [imc],
         message: "O Item #${imc.id} foi REMOVIDO com sucesso.",
         title: "Sucesso",
       );
@@ -144,9 +188,13 @@ class DBHelper {
         where: "id=?",
         whereArgs: [imc.id],
       );
+
+      ImcResponse response = await getImcById(id);
+      List<Imc> updatedImc = response.data;
+
       return ImcResponse(
         error: false,
-        data: id,
+        data: updatedImc,
         message: "O Item #${imc.id} foi ATUALIZADO com sucesso.",
         title: "Sucesso",
       );
@@ -180,11 +228,13 @@ class DBHelper {
         "height": user.height,
       };
 
-      await _database!.insert(_userstablename, userData);
+      int id = await _database!.insert(_userstablename, userData);
+      UserResponse response = await userQuery(id);
+      List<User> newUser = response.data;
 
       return UserResponse(
         error: false,
-        data: [user],
+        data: newUser,
         message: "Inserido com sucesso.",
         title: "Sucesso",
       );
@@ -207,12 +257,12 @@ class DBHelper {
     }
   }
 
-  static Future<UserResponse> userQuery(String name) async {
+  static Future<UserResponse> userQuery(int id) async {
     try {
       if (_database == null) throw DatabaseConnectionException();
 
       var data = await _database!.query(_userstablename,
-          where: "name=?", whereArgs: [name], orderBy: "id DESC");
+          where: "id=?", whereArgs: [id], orderBy: "id DESC");
 
       return UserResponse(
         error: false,

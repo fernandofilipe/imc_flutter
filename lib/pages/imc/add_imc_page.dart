@@ -3,13 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:imc_flutter/controllers/imc_controller.dart';
+import 'package:imc_flutter/controllers/user_controller.dart';
 import 'package:imc_flutter/models/imc.dart';
 import 'package:imc_flutter/models/imc_validator.dart';
 import 'package:imc_flutter/models/response.dart';
+import 'package:imc_flutter/models/user.dart';
 import 'package:imc_flutter/shared/constants.dart';
 import 'package:imc_flutter/shared/layout/theme.dart';
+import 'package:imc_flutter/shared/utils/number_utils.dart';
+import 'package:imc_flutter/shared/utils/string_utils.dart';
 import 'package:imc_flutter/shared/widgets/alert_validation.dart';
+import 'package:imc_flutter/shared/widgets/custom_app_bar.dart';
 import 'package:imc_flutter/shared/widgets/custom_button.dart';
+import 'package:imc_flutter/shared/widgets/custom_text_dropdown.dart';
 import 'package:imc_flutter/shared/widgets/feedback_dialog.dart';
 import 'package:imc_flutter/shared/widgets/input_form_field.dart';
 import 'package:imc_flutter/shared/widgets/number_input.dart';
@@ -25,6 +31,7 @@ class AddImcPage extends StatefulWidget {
 
 class _AddImcPageState extends State<AddImcPage> {
   final ImcController _imcController = Get.put(ImcController());
+  final UserController _userController = Get.put(UserController());
   final TextEditingController _nameController = TextEditingController(text: "");
   final TextEditingController _weightController =
       TextEditingController(text: "");
@@ -50,7 +57,7 @@ class _AddImcPageState extends State<AddImcPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.theme.colorScheme.background,
-      appBar: _appBar(context),
+      appBar: const CustomAppBar(isEditingAppBar: true),
       body: Container(
         padding: const EdgeInsets.only(left: 20, right: 20),
         child: SingleChildScrollView(
@@ -61,19 +68,70 @@ class _AddImcPageState extends State<AddImcPage> {
                 "Adicionar Medidas",
                 style: headingStyle,
               ),
-              InputFormField(
-                title: "Nome",
-                widget: StringInput(
-                  hint: "Escreva seu nome.",
-                  controller: _nameController,
-                ),
-              ),
-              InputFormField(
-                title: "Altura",
-                widget: NumberInput(
-                  hint: "Digite sua altura em Metros.",
-                  controller: _heightController,
-                ),
+              CustomTextDropdown<User>(
+                placeholder: "Escolha um usuário...",
+                controller: _nameController,
+                itemBuilder: (BuildContext p0, User p1) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 16,
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 20,
+                          child: Text(
+                            StringUtils.getInitials(p1.name),
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 8,
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              p1.name,
+                              style: titleStyle,
+                            ),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.design_services_outlined,
+                                  size: 14,
+                                  color: Colors.grey,
+                                ),
+                                Text(
+                                  p1.height.toString(),
+                                  style: const TextStyle(color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                onSelected: (p0) {
+                  _nameController.text = p0.name;
+                  _heightController.text = p0.height.toString();
+                  setState(() {});
+                },
+                suggestionsCallback: (p0) async {
+                  final users = await _userController.getUsers();
+                  return users.data.where((User user) => user.name
+                      .toLowerCase()
+                      .trim()
+                      .startsWith(p0.toLowerCase().trim()));
+                },
+                clearFunction: () {
+                  _nameController.clear();
+                  _heightController.clear();
+                  setState(() {});
+                },
+                enabled: true,
               ),
               InputFormField(
                 title: "Peso",
@@ -122,6 +180,7 @@ class _AddImcPageState extends State<AddImcPage> {
   }
 
   _validateAddForm() {
+    NumberUtils.formatToNumberTextEditingText(_heightController);
     var height = _heightController.text;
     var weight = _weightController.text;
     var name = _nameController.text;
@@ -144,38 +203,14 @@ class _AddImcPageState extends State<AddImcPage> {
     Imc imc = Imc(
       NumberFormat().parse(_heightController.text).toDouble(),
       NumberFormat().parse(_weightController.text).toDouble(),
-      user: _nameController.text,
-      measuredAt: DateFormat.yMd(Constants.appLocale).format(_selectedDate),
+      _nameController.text,
+      DateFormat.yMd(Constants.appLocale).format(_selectedDate),
     );
 
     ImcResponse response = await _imcController.add(imc: imc);
 
     await Get.dialog(FeedBackDialog(response: response));
     if (!response.error) Get.back();
-  }
-
-  _appBar(BuildContext context) {
-    return AppBar(
-      elevation: 0,
-      backgroundColor: context.theme.colorScheme.background,
-      leading: GestureDetector(
-        onTap: () {
-          Get.back();
-        },
-        child: const Icon(
-          Icons.arrow_back, //wb_sunny_outlined
-          size: 20,
-        ),
-      ),
-      actions: [
-        CircleAvatar(
-          child: Text(box.read('initials')),
-        ),
-        const SizedBox(
-          width: 20,
-        )
-      ],
-    );
   }
 
   _getSelectedDate() async {

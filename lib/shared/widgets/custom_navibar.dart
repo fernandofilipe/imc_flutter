@@ -16,11 +16,15 @@ class CustomNavibar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CurvedNavigationBar(
-      backgroundColor: context.theme.colorScheme.background,
-      color: Get.isDarkMode ? Colors.deepPurple : Colors.black87,
+      backgroundColor:
+          Colors.transparent, //context.theme.colorScheme.background
+      color: Get.isDarkMode
+          ? Theme.of(context).colorScheme.inversePrimary
+          : Theme.of(context).colorScheme.primary,
       items: items,
       onTap: onTap,
       index: index,
+      height: 60,
     );
   }
 }

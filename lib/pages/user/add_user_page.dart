@@ -1,41 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:imc_flutter/controllers/user_controller.dart';
 import 'package:imc_flutter/models/response.dart';
+import 'package:imc_flutter/models/user.dart';
 import 'package:imc_flutter/models/user_validator.dart';
 import 'package:imc_flutter/shared/layout/theme.dart';
-import 'package:imc_flutter/shared/utils/string_utils.dart';
 import 'package:imc_flutter/shared/widgets/alert_validation.dart';
+import 'package:imc_flutter/shared/widgets/custom_app_bar.dart';
 import 'package:imc_flutter/shared/widgets/custom_button.dart';
+import 'package:imc_flutter/shared/widgets/feedback_dialog.dart';
 import 'package:imc_flutter/shared/widgets/input_form_field.dart';
 import 'package:imc_flutter/shared/widgets/number_input.dart';
 import 'package:imc_flutter/shared/widgets/string_input.dart';
+import 'package:intl/intl.dart';
 
-class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+class AddUserPage extends StatefulWidget {
+  const AddUserPage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<AddUserPage> createState() => _AddUserPageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
-  final box = GetStorage();
+class _AddUserPageState extends State<AddUserPage> {
+  final UserController _userController = Get.put(UserController());
   final _nameController = TextEditingController(text: "");
   final _heightController = TextEditingController(text: "");
+  final box = GetStorage();
 
   bool saving = false;
 
   @override
   void initState() {
     super.initState();
-    _nameController.text = box.read('username');
-    _heightController.text = box.read('height');
+  }
+
+  Future<UserResponse> getUsers() async {
+    UserResponse userResponse = await _userController.getUsers();
+    return userResponse;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _appBar(context),
+      appBar: const CustomAppBar(isEditingAppBar: true),
+      backgroundColor: context.theme.colorScheme.background,
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         child: saving
@@ -43,7 +52,7 @@ class _ProfilePageState extends State<ProfilePage> {
             : ListView(
                 children: [
                   Text(
-                    "Perfil",
+                    "Novo Usuário",
                     style: headingStyle,
                   ),
                   InputFormField(
@@ -105,40 +114,18 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() {
       saving = true;
     });
+    User user = User(
+      _nameController.text,
+      NumberFormat().parse(_heightController.text).toDouble(),
+    );
 
-    final box = GetStorage();
-    await box.write('username', _nameController.text);
-    await box.write('initials', StringUtils.getInitials(_nameController.text));
-    await box.write('height', _heightController.text);
+    UserResponse response = await _userController.add(user: user);
+
+    await Get.dialog(FeedBackDialog(response: response));
 
     setState(() {
       saving = false;
     });
-
-    Get.back();
-  }
-
-  _appBar(BuildContext context) {
-    return AppBar(
-      elevation: 0,
-      backgroundColor: context.theme.colorScheme.background,
-      leading: GestureDetector(
-        onTap: () {
-          Get.back();
-        },
-        child: const Icon(
-          Icons.arrow_back, //wb_sunny_outlined
-          size: 20,
-        ),
-      ),
-      actions: [
-        CircleAvatar(
-          child: Text(box.read('initials')),
-        ),
-        const SizedBox(
-          width: 20,
-        )
-      ],
-    );
+    if (!response.error) Get.back();
   }
 }

@@ -1,8 +1,6 @@
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:imc_flutter/shared/colors.dart';
 import 'package:imc_flutter/shared/constants.dart';
 import 'package:intl/intl.dart';
 
@@ -28,9 +26,7 @@ class CustomDatePicker extends StatelessWidget {
       height: 100,
       width: 80,
       locale: Intl.defaultLocale ?? Constants.appLocale,
-      selectionColor: Get.isDarkMode
-          ? AppColors.primaryDarkColor
-          : AppColors.primaryLightColor,
+      selectionColor: Theme.of(context).colorScheme.inversePrimary,
       selectedTextColor: Colors.white,
       dateTextStyle: GoogleFonts.lato(
         textStyle: const TextStyle(

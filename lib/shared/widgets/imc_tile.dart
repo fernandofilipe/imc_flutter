@@ -86,7 +86,7 @@ class ImcTile extends StatelessWidget {
           width: 4,
         ),
         Text(
-          imc!.measuredAt,
+          imc!.measuredAt ?? "",
           style: GoogleFonts.lato(
             fontSize: 14,
             fontWeight: FontWeight.bold,

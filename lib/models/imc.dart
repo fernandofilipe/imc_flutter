@@ -7,22 +7,25 @@ import 'package:imc_flutter/shared/colors.dart';
 
 class Imc {
   int? _id;
-  String user = "";
+  String? user;
   double _height = 0.0;
   double _weight = 0.0;
   double _imcValue = 0.0;
-  String measuredAt = "";
-  String _createdAt = "";
-  String updatedAt = "";
-  int active = 1;
+  String? measuredAt;
+  String? createdAt;
+  String? updatedAt;
+  int? active;
 
   Imc(
     this._height,
-    this._weight, {
+    this._weight, [
     this.user = "",
     this.measuredAt = "",
+    this.createdAt = "",
+    this.updatedAt = "",
     this.active = 1,
-  }) {
+    this._id,
+  ]) {
     _calculateImcValue();
   }
 
@@ -30,7 +33,6 @@ class Imc {
   double get height => _height;
   double get weight => _weight;
   double get imcValue => _imcValue;
-  String get createdAt => _createdAt;
 
   set height(double height) {
     if (height <= 0) throw InvalidHeightException();
@@ -81,7 +83,7 @@ class Imc {
     _weight = json["weight"];
     _imcValue = json["imc_value"] ?? 0;
     measuredAt = json["measured_at"];
-    _createdAt = json["created_at"];
+    createdAt = json["created_at"];
     updatedAt = json["updated_at"];
     active = json["active"];
   }
@@ -94,7 +96,7 @@ class Imc {
     data["weight"] = _weight;
     data["imc_value"] = _imcValue;
     data["measured_at"] = measuredAt;
-    data["created_at"] = _createdAt;
+    data["created_at"] = createdAt;
     data["updated_at"] = updatedAt;
     data["active"] = active;
 

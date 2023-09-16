@@ -12,4 +12,8 @@ class NumberUtils {
       composing: TextRange.empty,
     );
   }
+
+  static String numberToString(double value) {
+    return value.toString().replaceAll(".", ",");
+  }
 }

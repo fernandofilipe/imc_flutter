@@ -4,7 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppThemes {
   static var light = ThemeData(
-    colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
+    colorScheme: ColorScheme.fromSeed(seedColor: Colors.white).copyWith(
+      primary: const Color.fromARGB(255, 34, 34, 34).withOpacity(0.991),
+      tertiary: Colors.cyan,
+    ),
     useMaterial3: true,
   );
 

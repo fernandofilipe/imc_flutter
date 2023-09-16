@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:imc_flutter/shared/layout/theme.dart';
 
 class CustomTextDropdown<T> extends StatelessWidget {
   final String placeholder;
@@ -34,20 +35,15 @@ class CustomTextDropdown<T> extends StatelessWidget {
           textFieldConfiguration: TextFieldConfiguration(
             controller: controller,
             enabled: enabled,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium!
-                .copyWith(color: Colors.grey, fontWeight: FontWeight.bold),
+            style: titleStyle,
+            decoration: InputDecoration(
+              hintText: placeholder,
+              hintStyle: subTitleStyle,
+            ),
           ),
           suggestionsBoxController: suggestionsBoxController,
           suggestionsCallback: suggestionsCallback,
           itemBuilder: itemBuilder,
-          itemSeparatorBuilder: (context, index) {
-            return const Divider(
-              endIndent: 16,
-              indent: 16,
-            );
-          },
           onSuggestionSelected: onSelected,
           autoFlipDirection: true,
         ),
@@ -58,7 +54,7 @@ class CustomTextDropdown<T> extends StatelessWidget {
               padding: const EdgeInsets.only(top: 2.0),
               child: IconButton(
                 onPressed: clearFunction,
-                icon: const Icon(Icons.close),
+                icon: const Icon(Icons.cancel_outlined),
                 color: Colors.grey,
               ),
             ),

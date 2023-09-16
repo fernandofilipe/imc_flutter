@@ -7,9 +7,9 @@ class StringUtils {
     final tokens = name.trim().split(" ");
 
     if (tokens.length <= 1) {
-      return "${tokens[0][0]}${tokens[0][1]}";
+      return "${tokens[0][0]}${tokens[0][1]}".toUpperCase();
     }
 
-    return "${tokens[0][0]}${tokens[1][0]}";
+    return "${tokens[0][0]}${tokens[1][0]}".toUpperCase();
   }
 }

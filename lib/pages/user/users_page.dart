@@ -3,25 +3,17 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:imc_flutter/controllers/user_controller.dart';
-import 'package:imc_flutter/models/response.dart';
 import 'package:imc_flutter/models/user.dart';
-import 'package:imc_flutter/models/user_validator.dart';
-import 'package:imc_flutter/pages/add_user_page.dart';
-import 'package:imc_flutter/pages/profile_page.dart';
-import 'package:imc_flutter/services/theme_services.dart';
 import 'package:imc_flutter/shared/colors.dart';
 import 'package:imc_flutter/shared/constants.dart';
 import 'package:imc_flutter/shared/layout/theme.dart';
 import 'package:imc_flutter/shared/utils/number_utils.dart';
-import 'package:imc_flutter/shared/widgets/alert_validation.dart';
 import 'package:imc_flutter/shared/widgets/custom_bottom_sheet_button.dart';
-import 'package:imc_flutter/shared/widgets/feedback_dialog.dart';
 import 'package:imc_flutter/shared/widgets/input_form_field.dart';
 import 'package:imc_flutter/shared/widgets/number_input.dart';
 import 'package:imc_flutter/shared/widgets/string_input.dart';
 import 'package:imc_flutter/shared/widgets/user_tile.dart';
 import 'package:intl/intl.dart';
-import 'dart:math' as math;
 
 class UsersPage extends StatefulWidget {
   const UsersPage({super.key});
@@ -32,120 +24,38 @@ class UsersPage extends StatefulWidget {
 
 class _UsersPageState extends State<UsersPage> {
   final UserController _userController = Get.put(UserController());
-  final TextEditingController _nameController = TextEditingController(text: "");
-  final TextEditingController _heightController =
-      TextEditingController(text: "");
 
   final box = GetStorage();
 
   @override
   void initState() {
     super.initState();
-    _refreshUsersList();
+    _userController.init();
   }
 
-  Future<void> _refreshUsersList() async {
-    debugPrint("------------------ ATUALIZOU!!! ---------------------");
-    UserResponse response = await _userController.getUsers();
-    if (response.error) {
-      await Get.dialog(FeedBackDialog(response: response));
-    }
-  }
-
-  _updateUser(User user) async {
-    user.name = _nameController.text;
-    user.height = NumberFormat().parse(_heightController.text).toDouble();
-    user.updatedAt = DateTime.now().toString();
-
-    UserResponse response = await _userController.updateUser(user);
-    _refreshUsersList();
-    await Get.dialog(FeedBackDialog(response: response));
-    if (!response.error) Get.back();
-  }
-
-  _deleteUser(User user) async {
-    UserResponse response = await _userController.delete(user);
-    _refreshUsersList();
-    await Get.dialog(FeedBackDialog(response: response));
-    if (!response.error) Get.back();
-  }
-
-  bool _validateEditForm(User user) {
-    var height = _heightController.text;
-    var name = _nameController.text;
-    UserResponse validation =
-        UserValidator().validate(height: height, name: name, isEditing: true);
-
-    if (validation.error) {
-      AlertValidation.showCustomSnackbar(
-        title: validation.title,
-        message: validation.message,
-      );
-
-      return false;
-    }
-
-    _updateUser(user);
-    Get.back();
-    return true;
+  @override
+  void dispose() {
+    super.dispose();
+    _userController.heightController.dispose();
+    _userController.nameController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _showAppBar(box.read('initials')),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _showAppHeader(),
-          const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Text(
-              "Usuários",
-              style: headingStyle,
-            ),
-          ),
-          const SizedBox(height: 10),
-          _showUsersList(),
-        ],
-      ),
-      floatingActionButton: _showAddUserButton(),
-    );
-  }
-
-  _showAppBar(String initial) {
-    return AppBar(
-      elevation: 0,
-      backgroundColor: context.theme.colorScheme.background,
-      leading: GestureDetector(
-        onTap: () {
-          ThemeService().switchTheme();
-        },
-        child: Transform.rotate(
-          angle: 315 * math.pi / 180,
-          child: Get.isDarkMode
-              ? const Icon(Icons.wb_sunny_outlined, size: 20)
-              : const Icon(
-                  Icons.nightlight_outlined, //wb_sunny_outlined
-                  size: 20,
-                  color: AppColors.darkGreyClr,
-                ),
-        ),
-      ),
-      actions: [
-        InkWell(
-          onTap: () async {
-            await Get.to(
-              () => const ProfilePage(),
-              preventDuplicates: true,
-            );
-          },
-          child: CircleAvatar(
-            child: Text(initial),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _showAppHeader(),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Text(
+            "Usuários",
+            style: headingStyle,
           ),
         ),
-        const SizedBox(width: 20)
+        const SizedBox(height: 10),
+        _showUsersList(),
       ],
     );
   }
@@ -231,8 +141,9 @@ class _UsersPageState extends State<UsersPage> {
               context: context,
               onTap: () {
                 setState(() {
-                  _heightController.text = user.height.toString();
-                  _nameController.text = user.name;
+                  _userController.heightController.text =
+                      user.height.toString();
+                  _userController.nameController.text = user.name;
                 });
                 _showEditDialog(user);
               },
@@ -242,7 +153,7 @@ class _UsersPageState extends State<UsersPage> {
               color: Colors.red[300]!,
               context: context,
               onTap: () {
-                _deleteUser(user);
+                _userController.delete(user);
               },
             ),
             const SizedBox(height: 20),
@@ -263,7 +174,7 @@ class _UsersPageState extends State<UsersPage> {
   }
 
   _showEditDialog(User user) {
-    NumberUtils.formatToNumberTextEditingText(_heightController);
+    NumberUtils.formatToNumberTextEditingText(_userController.heightController);
 
     return Get.dialog(
       AlertDialog(
@@ -277,14 +188,14 @@ class _UsersPageState extends State<UsersPage> {
               title: "Nome",
               widget: StringInput(
                 hint: "Escreva seu nome.",
-                controller: _nameController,
+                controller: _userController.nameController,
               ),
             ),
             InputFormField(
               title: "Altura",
               widget: NumberInput(
                 hint: "Digite sua altura em Metros.",
-                controller: _heightController,
+                controller: _userController.heightController,
               ),
             ),
           ],
@@ -293,7 +204,7 @@ class _UsersPageState extends State<UsersPage> {
           TextButton(
             onPressed: () {
               setState(() {
-                var isValidated = _validateEditForm(user);
+                var isValidated = _userController.validateEditForm(user);
                 if (isValidated) Get.back();
               });
             },
@@ -311,20 +222,6 @@ class _UsersPageState extends State<UsersPage> {
           ),
         ],
       ),
-    );
-  }
-
-  _showAddUserButton() {
-    return FloatingActionButton(
-      onPressed: () async {
-        await Get.to(
-          () => const AddUserPage(),
-          preventDuplicates: true,
-        );
-        _refreshUsersList();
-      },
-      shape: const CircleBorder(),
-      child: const Icon(Icons.add),
     );
   }
 }

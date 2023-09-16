@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:imc_flutter/shared/colors.dart';
 
 class CustomButton extends StatelessWidget {
   final String label;
@@ -25,8 +24,8 @@ class CustomButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(5),
           color: Get.isDarkMode
-              ? AppColors.buttonPrimaryDarkColor
-              : AppColors.buttonPrimaryLightColor,
+              ? Theme.of(context).colorScheme.inversePrimary
+              : Theme.of(context).colorScheme.tertiary,
         ),
         child: Text(
           label,
