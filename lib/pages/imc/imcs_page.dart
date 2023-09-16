@@ -90,6 +90,8 @@ class _HomePageState extends State<HomePage> {
                             Get.bottomSheet(
                               EditBottomSheet(
                                 buildContext: context,
+                                editTitle: "Editar Medida",
+                                deleteTitle: "Remover Medida",
                                 onEditAction: () {
                                   setState(() {
                                     _imcController.heightController.text =
@@ -105,7 +107,7 @@ class _HomePageState extends State<HomePage> {
                                   });
 
                                   _showEditDialog(
-                                      context, _imcController.imcList[index]);
+                                      _imcController.imcList[index]);
                                 },
                                 onDeleteAction: () {
                                   _imcController
@@ -130,7 +132,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  _showEditDialog(BuildContext context, Imc imc) async {
+  _showEditDialog(Imc imc) async {
     NumberUtils.formatToNumberTextEditingText(_imcController.heightController);
     NumberUtils.formatToNumberTextEditingText(_imcController.weightController);
 

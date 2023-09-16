@@ -54,8 +54,9 @@ class CustomTextDropdown<T> extends StatelessWidget {
               padding: const EdgeInsets.only(top: 2.0),
               child: IconButton(
                 onPressed: clearFunction,
-                icon: const Icon(Icons.cancel_outlined),
+                icon: const Icon(Icons.cancel_sharp),
                 color: Colors.grey,
+                iconSize: 20,
               ),
             ),
           ),

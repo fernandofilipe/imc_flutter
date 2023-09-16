@@ -16,8 +16,7 @@ Criar um APP Flutter que cálcula o IMC onde devemos:
 Criar um APP Flutter que cálcula o IMC onde devemos:
 
 * Criar classe IMC (Peso / Altura)​ ✅
-* Altura ler em tela de Configurações ⚠️
-    * **Falta** ajustar a tela de registro de pesos para pegar da lista de usuários cadastrados.
+* Altura ler em tela de Configurações ✅   
 * Ler dados no app​ ✅
 * Calcular IMC ✅
 * Gravar dados no Hive ou SQLite​ ✅
