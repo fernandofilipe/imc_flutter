@@ -3,11 +3,11 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:imc_flutter/controllers/imc_controller.dart';
 import 'package:imc_flutter/models/imc.dart';
-import 'package:imc_flutter/shared/colors.dart';
 import 'package:imc_flutter/shared/constants.dart';
 import 'package:imc_flutter/shared/layout/theme.dart';
-import 'package:imc_flutter/shared/widgets/custom_bottom_sheet_button.dart';
+import 'package:imc_flutter/shared/widgets/custom_app_header.dart';
 import 'package:imc_flutter/shared/widgets/custom_datepicker.dart';
+import 'package:imc_flutter/shared/widgets/edit_bottom_sheet.dart';
 import 'package:imc_flutter/shared/widgets/imc_tile.dart';
 import 'package:imc_flutter/shared/widgets/input_form_field.dart';
 import 'package:imc_flutter/shared/widgets/number_input.dart';
@@ -49,35 +49,11 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _showAppHeader(),
+        const CustomAppHeader(),
         _showCalendarFilter(),
         const SizedBox(height: 10),
         _showImcList(),
       ],
-    );
-  }
-
-  _showAppHeader() {
-    return Container(
-      margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                DateFormat.yMMMMd(Constants.appLocale).format(DateTime.now()),
-                style: subHeadingStyle,
-              ),
-              Text(
-                Constants.appTitle,
-                style: headingStyle,
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
@@ -111,8 +87,32 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            _showBottomSheet(
-                                context, _imcController.imcList[index]);
+                            Get.bottomSheet(
+                              EditBottomSheet(
+                                buildContext: context,
+                                onEditAction: () {
+                                  setState(() {
+                                    _imcController.heightController.text =
+                                        _imcController.imcList[index].height
+                                            .toString();
+                                    _imcController.weightController.text =
+                                        _imcController.imcList[index].weight
+                                            .toString();
+                                    _imcController.calendarInputFieldController
+                                        .text = _imcController
+                                            .imcList[index].measuredAt ??
+                                        "";
+                                  });
+
+                                  _showEditDialog(
+                                      context, _imcController.imcList[index]);
+                                },
+                                onDeleteAction: () {
+                                  _imcController
+                                      .delete(_imcController.imcList[index]);
+                                },
+                              ),
+                            );
                           },
                           child: ImcTile(
                             imc: _imcController.imcList[index],
@@ -130,68 +130,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  _showBottomSheet(BuildContext context, Imc imc) {
-    Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.only(top: 4),
-        height: MediaQuery.of(context).size.height * 0.32,
-        width: double.infinity,
-        color: Get.isDarkMode ? AppColors.darkGreyClr : Colors.white,
-        child: Column(
-          children: [
-            Container(
-              height: 6,
-              width: 120,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Get.isDarkMode ? Colors.grey[600] : Colors.grey[300],
-              ),
-            ),
-            const Spacer(),
-            CustomBottomSheetButton(
-              label: "Atualizar Medida",
-              color: AppColors.primaryClr,
-              context: context,
-              onTap: () {
-                setState(() {
-                  _imcController.heightController.text = imc.height.toString();
-                  _imcController.weightController.text = imc.weight.toString();
-                  _imcController.calendarInputFieldController.text =
-                      imc.measuredAt ?? "";
-                });
-                _showEditDialog(context, imc);
-              },
-            ),
-            CustomBottomSheetButton(
-              label: "Remover Medida",
-              color: Colors.red[300]!,
-              context: context,
-              onTap: () {
-                _imcController.delete(imc);
-              },
-            ),
-            const SizedBox(height: 20),
-            CustomBottomSheetButton(
-              label: "Fechar",
-              color: Colors.white,
-              context: context,
-              isCloseButton: true,
-              onTap: () {
-                Get.back();
-              },
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  _showEditDialog(BuildContext context, Imc imc) {
+  _showEditDialog(BuildContext context, Imc imc) async {
     NumberUtils.formatToNumberTextEditingText(_imcController.heightController);
     NumberUtils.formatToNumberTextEditingText(_imcController.weightController);
 
-    return Get.dialog(
+    await Get.dialog(
       AlertDialog(
         title: Text(
           "Alterar Medidas",

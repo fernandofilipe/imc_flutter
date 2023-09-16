@@ -5,15 +5,14 @@ import 'package:get_storage/get_storage.dart';
 import 'package:imc_flutter/controllers/user_controller.dart';
 import 'package:imc_flutter/models/user.dart';
 import 'package:imc_flutter/shared/colors.dart';
-import 'package:imc_flutter/shared/constants.dart';
 import 'package:imc_flutter/shared/layout/theme.dart';
 import 'package:imc_flutter/shared/utils/number_utils.dart';
+import 'package:imc_flutter/shared/widgets/custom_app_header.dart';
 import 'package:imc_flutter/shared/widgets/custom_bottom_sheet_button.dart';
 import 'package:imc_flutter/shared/widgets/input_form_field.dart';
 import 'package:imc_flutter/shared/widgets/number_input.dart';
 import 'package:imc_flutter/shared/widgets/string_input.dart';
 import 'package:imc_flutter/shared/widgets/user_tile.dart';
-import 'package:intl/intl.dart';
 
 class UsersPage extends StatefulWidget {
   const UsersPage({super.key});
@@ -45,7 +44,7 @@ class _UsersPageState extends State<UsersPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _showAppHeader(),
+        const CustomAppHeader(),
         const SizedBox(height: 10),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -57,30 +56,6 @@ class _UsersPageState extends State<UsersPage> {
         const SizedBox(height: 10),
         _showUsersList(),
       ],
-    );
-  }
-
-  _showAppHeader() {
-    return Container(
-      margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                DateFormat.yMMMMd(Constants.appLocale).format(DateTime.now()),
-                style: subHeadingStyle,
-              ),
-              Text(
-                Constants.appTitle,
-                style: headingStyle,
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
