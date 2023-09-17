@@ -12,7 +12,7 @@ class LoginServices {
         1.83,
       ));
 
-      return response.data;
+      return response.data.first;
     }
 
     return users.first;

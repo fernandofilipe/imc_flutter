@@ -16,7 +16,7 @@ class DBHelper {
 
     try {
       String path = "${await getDatabasesPath()}imc.db";
-      //await deleteDatabase(path);
+      await deleteDatabase(path);
 
       _database = await openDatabase(path, version: _version,
           onCreate: (Database db, int version) {
@@ -304,14 +304,16 @@ class DBHelper {
 
       return UserResponse(
         error: false,
-        data: data
-            .map((user) => User(
-                user['name'] as String,
-                user['height'] as double,
-                user['id'] as int,
-                user['created_at'] as String,
-                user['updated_at'] as String))
-            .toList(),
+        data: data.isEmpty
+            ? []
+            : data
+                .map((user) => User(
+                    user['name'] as String,
+                    user['height'] as double,
+                    user['id'] as int,
+                    user['created_at'] as String,
+                    user['updated_at'] as String))
+                .toList(),
         message: "O usuário foi CADASTRADO com sucesso.",
         title: "Sucesso",
       );

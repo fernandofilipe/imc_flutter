@@ -76,6 +76,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         _profileController.updateLoggedUser();
                       }
 
+                      FocusManager.instance.primaryFocus?.unfocus();
                       _profileController.saving = false;
                       setState(() {});
                     },

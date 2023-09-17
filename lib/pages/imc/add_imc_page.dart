@@ -166,6 +166,7 @@ class _AddImcPageState extends State<AddImcPage> {
                   label: "Enviar",
                   width: double.infinity,
                   onTap: () {
+                    FocusManager.instance.primaryFocus?.unfocus();
                     setState(() {
                       _validateAddForm();
                     });

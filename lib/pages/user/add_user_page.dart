@@ -77,12 +77,11 @@ class _AddUserPageState extends State<AddUserPage> {
                       label: "Salvar",
                       width: double.infinity,
                       onTap: () {
+                        FocusManager.instance.primaryFocus?.unfocus();
                         setState(() {
-                          setState(() {
-                            saving = false;
-                          });
-                          _validateForm();
+                          saving = false;
                         });
+                        _validateForm();
                       },
                     ),
                   ),
